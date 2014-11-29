@@ -32,7 +32,13 @@ public class State {
 	@Override
 	public boolean equals(Object o)
 	{
-	    return this.stringVal.equals(o);
+	    State s = (State) o;
+		return this.getXCord() == s.getXCord() && this.getYCord() == s.getYCord();
+	}
+	
+	@Override
+	public String toString(){
+		return this.stringVal;
 	}
 	
 	
