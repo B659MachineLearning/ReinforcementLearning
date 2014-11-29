@@ -7,7 +7,6 @@ public class ValueIteration {
 	private static int gridSizeLength;
 	private static int gridSizeHeight;
 	private static int numberOfPossActions;
-	private static double utilValue;
 	private static double states[][];
 	private static String[] actions = {"up", "right", "down", "left"}; 
 	
@@ -15,17 +14,31 @@ public class ValueIteration {
 	//private static double epsilon;
 	private static double gamma;
 	
-	private static int reward[][] = {
-									{0,	  0,	0,	 10},
-									{0,	-50,    0,	  0},
-									{0,	  0,	0,	  0},
-									{1,	  0,	0,	  0},	
-									};
+//	private static int reward[][] = {
+//									{-1,	  -1,	-1,	 10},
+//									{-1,   	-50,    -1,	  -1},
+//									{-1, 	  0,	-1,	  0},
+//									{-1,	  -1,	-1,	  -1},	
+//									};
+//	
+//	private static double upTransit[] 		= {0.8, 0.0, 0.0, 0.2};
+//	private static double rightTransit[] 	= {0.0, 0.8, 0.2, 0.0};
+//	private static double downTransit[] 	= {0.0, 0.0, 1.0, 0.0};
+//	private static double leftTransit[] 	= {0.0, 0.0, 0.0, 1.0};
 	
-	private static double upTransit[] 		= {0.8, 0.0, 0.0, 0.2};
-	private static double rightTransit[] 	= {0.0, 0.8, 0.2, 0.0};
-	private static double downTransit[] 	= {0.0, 0.0, 1.0, 0.0};
+	private static int reward[][] = {
+		{0,	  0,	0,	  10},
+		{0, -50,   	0,	  0},
+		{0,	  0,	0,	  0},
+		{0,   0,	0,    0},
+		{0,   0,	0,    0},	
+		};
+	//											up	right down	left	
+	private static double rightTransit[] 	= {0.0, 0.6, 0.4, 0.0};
 	private static double leftTransit[] 	= {0.0, 0.0, 0.0, 1.0};
+	private static double upTransit[] 		= {0.6, 0.0, 0.0, 0.4};
+	private static double downTransit[] 	= {0.0, 0.0, 1.0, 0.0};
+	
 	
 	
 	public static void main(String args[]){
@@ -34,11 +47,13 @@ public class ValueIteration {
 		gridSizeHeight = Integer.parseInt(Config.readConfig("gridSizeHeight"));
 		numberOfPossActions = Integer.parseInt(Config.readConfig("numberOfPossActions"));
 		
-		delta = Integer.parseInt(Config.readConfig("delta"));
+		delta = Double.parseDouble(Config.readConfig("delta"));
 		//epsilon = Integer.parseInt(Config.readConfig("epsilon"));
-		gamma = Integer.parseInt(Config.readConfig("gamma"));
+		gamma = Double.parseDouble(Config.readConfig("gamma"));
 		
-		states = new double[gridSizeLength][gridSizeHeight]; 
+		System.out.println("gridSizeLength : "+gridSizeLength+"  gridSizeHeight : "+gridSizeHeight);
+		states = new double[gridSizeHeight][gridSizeLength]; 
+		
 		
 		//Value iteration algorithm 
 		/*
@@ -52,20 +67,26 @@ public class ValueIteration {
 		boolean isConverged = false;
 		
 		while(!isConverged){
+			isConverged = true;
+			
+			System.out.println("**********************************");
 			for(int i=0; i<gridSizeHeight; i++){
 				for(int j=0; j<gridSizeLength; j++){
-					utilVal = getUtilVal(i,j);
+					//System.out.println(i+"="+j);
+					if((j == 1 || j == 3) && (i == 3)){
+						continue;
+					}
+					utilVal = getUtilVal(i ,j);
 					
 					//Get Current utility value for state and action
+					//System.out.println(i+"-"+j);
 					currUtilVal = states[i][j];
 					
+					System.out.println("utilVal = "+utilVal+" currUtilVal = "+currUtilVal);
 					//Check for Error threshold
-					if(currUtilVal - utilVal > delta){
+					if(Math.abs(currUtilVal - utilVal) > delta){
 						isConverged = false;
 						states[i][j] = utilVal;
-					}
-					else{
-						isConverged = true;
 					}
 				}
 			}
@@ -75,7 +96,7 @@ public class ValueIteration {
 		System.out.println("=============================");
 		for(int i=0; i<gridSizeHeight; i++){
 			for(int j=0; j<gridSizeLength; j++){
-				System.out.println(" | "+states[i][j]+" | ");
+				System.out.format(" %.2f ",states[i][j]);
 			}
 			System.out.println();
 		}
@@ -85,15 +106,27 @@ public class ValueIteration {
 	
 	public static double getUtilVal(int x, int y){
 		double stateReward = reward[x][y] - 1;
-		double maxVal = 0.0;
+		double maxVal = -999999999999999.99;
 		double uVal = 0.0;
 		double transVal = 0.0;
 		for(int j=0; j<numberOfPossActions; j++){
 			 TransitionModel trn = getTransitionModel(actions[j]);
 			 transVal = 0.0;
 			 for(int k=0; k<numberOfPossActions; k++){
-				 transVal += trn.getTranProb(actions[k])*states[getNextXcord(x, actions[k])][getNextYcord(y, actions[k])];
+				 int nextX = getNextXcord(x, actions[k]);
+				 int nextY = getNextYcord(y, actions[k]);
+				 
+				 if((nextY == 1 || nextY == 3) && (nextX == 3)){
+					 //System.out.println(x+"^"+y);
+					 transVal += trn.getTranProb(actions[k])*states[x][y];
+				 }
+				 else{
+					 //System.out.println(nextX + " : "+ nextY );
+					 transVal += trn.getTranProb(actions[k])*states[nextX][nextY];
+				 }
+				 
 			 }
+			 System.out.println(stateReward+" + ("+gamma+" * "+transVal+")");
 			 uVal = stateReward + (gamma * transVal);
 			 
 			 if(uVal > maxVal){
@@ -105,30 +138,8 @@ public class ValueIteration {
 		
 	}
 	
-	public static int getNextYcord(int y, String action){
-		if(action.equalsIgnoreCase("up")){
-			if(y-1 >= 0){
-				return y-1;
-			}
-			else{
-				return y;
-			}
-		}
-		else if(action.equalsIgnoreCase("down")){
-			if(y+1 <= gridSizeHeight-1){
-				return y+1;
-			}
-			else{
-				return y;
-			}
-		}
-		else{
-			return y;
-		}
-	}
-	
 	public static int getNextXcord(int x, String action){
-		if(action.equalsIgnoreCase("left")){
+		if(action.equalsIgnoreCase("up")){
 			if(x-1 >= 0){
 				return x-1;
 			}
@@ -136,8 +147,8 @@ public class ValueIteration {
 				return x;
 			}
 		}
-		else if(action.equalsIgnoreCase("right")){
-			if(x+1 <= gridSizeLength-1){
+		else if(action.equalsIgnoreCase("down")){
+			if(x+1 <= gridSizeHeight-1){
 				return x+1;
 			}
 			else{
@@ -146,6 +157,28 @@ public class ValueIteration {
 		}
 		else{
 			return x;
+		}
+	}
+	
+	public static int getNextYcord(int y, String action){
+		if(action.equalsIgnoreCase("left")){
+			if(y-1 >= 0){
+				return y-1;
+			}
+			else{
+				return y;
+			}
+		}
+		else if(action.equalsIgnoreCase("right")){
+			if(y+1 <= gridSizeLength-1){
+				return y+1;
+			}
+			else{
+				return y;
+			}
+		}
+		else{
+			return y;
 		}
 	}
 	
