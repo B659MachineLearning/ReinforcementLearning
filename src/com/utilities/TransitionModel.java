@@ -31,20 +31,4 @@ public class TransitionModel {
 				return 0.0;
 		}
 	}
-	
-//	public double getUpProb(){
-//		return this.up;
-//	}
-//	
-//	public double getRightProb(){
-//		return this.right;
-//	}
-//	
-//	public double getDownProb(){
-//		return this.down;
-//	}
-//	
-//	public double getLeftProb(){
-//		return this.left;
-//	}
 }
