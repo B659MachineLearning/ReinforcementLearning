@@ -14,30 +14,31 @@ public class ValueIteration {
 	//private static double epsilon;
 	private static double gamma;
 	
-//	private static int reward[][] = {
-//									{-1,	  -1,	-1,	 10},
-//									{-1,   	-50,    -1,	  -1},
-//									{-1, 	  0,	-1,	  0},
-//									{-1,	  -1,	-1,	  -1},	
-//									};
-//	
-//	private static double upTransit[] 		= {0.8, 0.0, 0.0, 0.2};
-//	private static double rightTransit[] 	= {0.0, 0.8, 0.2, 0.0};
-//	private static double downTransit[] 	= {0.0, 0.0, 1.0, 0.0};
-//	private static double leftTransit[] 	= {0.0, 0.0, 0.0, 1.0};
-	
 	private static int reward[][] = {
-		{0,	  0,	0,	  10},
-		{0, -50,   	0,	  0},
-		{0,	  0,	0,	  0},
-		{0,   0,	0,    0},
-		{0,   0,	0,    0},	
-		};
-	//											up	right down	left	
-	private static double rightTransit[] 	= {0.0, 0.6, 0.4, 0.0};
-	private static double leftTransit[] 	= {0.0, 0.0, 0.0, 1.0};
-	private static double upTransit[] 		= {0.6, 0.0, 0.0, 0.4};
+									{0,	  0,	0,	 10},
+									{0, -50,    0,	  0},
+									{0,	  0,	0,	  0},
+									{0,   0,	0,	  0},
+									{0,	  0,	0,	  0},	
+									};
+										  //   up  right down left
+	private static double upTransit[] 		= {0.8, 0.0, 0.0, 0.2};
+	private static double rightTransit[] 	= {0.0, 0.8, 0.2, 0.0};
 	private static double downTransit[] 	= {0.0, 0.0, 1.0, 0.0};
+	private static double leftTransit[] 	= {0.0, 0.0, 0.0, 1.0};
+	
+//	private static int reward[][] = {
+//		{0,	  0,	0,	  10},
+//		{0, -50,   	0,	  0},
+//		{0,	  0,	0,	  0},
+//		{0,   0,	0,    0},
+//		{0,   0,	0,    0},	
+//		};
+//	//											up	right down	left	
+//	private static double rightTransit[] 	= {0.0, 0.6, 0.4, 0.0};
+//	private static double leftTransit[] 	= {0.0, 0.0, 0.0, 1.0};
+//	private static double upTransit[] 		= {0.6, 0.0, 0.0, 0.4};
+//	private static double downTransit[] 	= {0.0, 0.0, 1.0, 0.0};
 	
 	
 	
@@ -66,10 +67,10 @@ public class ValueIteration {
 		double currUtilVal = 0.0f;
 		boolean isConverged = false;
 		
+		int count = 0;
 		while(!isConverged){
 			isConverged = true;
-			
-			System.out.println("**********************************");
+			count++;
 			for(int i=0; i<gridSizeHeight; i++){
 				for(int j=0; j<gridSizeLength; j++){
 					//System.out.println(i+"="+j);
@@ -82,7 +83,7 @@ public class ValueIteration {
 					//System.out.println(i+"-"+j);
 					currUtilVal = states[i][j];
 					
-					System.out.println("utilVal = "+utilVal+" currUtilVal = "+currUtilVal);
+					//System.out.println("utilVal = "+utilVal+" currUtilVal = "+currUtilVal);
 					//Check for Error threshold
 					if(Math.abs(currUtilVal - utilVal) > delta){
 						isConverged = false;
@@ -92,20 +93,20 @@ public class ValueIteration {
 			}
 		}
 		
-		System.out.println("ValueIteration Output : ");
-		System.out.println("=============================");
+		System.out.println("ValueIteration Output after "+count+" iterations : ");
+		System.out.println("========================================");
 		for(int i=0; i<gridSizeHeight; i++){
 			for(int j=0; j<gridSizeLength; j++){
-				System.out.format(" %.2f ",states[i][j]);
+				System.out.format(" %8.2f",states[i][j]);
 			}
 			System.out.println();
 		}
-		System.out.println("=============================");
+		System.out.println("========================================");
 	}
 	
 	
 	public static double getUtilVal(int x, int y){
-		double stateReward = reward[x][y] - 1;
+		double stateReward = reward[x][y] - 1; // -1 reward for each time step
 		double maxVal = -999999999999999.99;
 		double uVal = 0.0;
 		double transVal = 0.0;
@@ -126,7 +127,7 @@ public class ValueIteration {
 				 }
 				 
 			 }
-			 System.out.println(stateReward+" + ("+gamma+" * "+transVal+")");
+			 //System.out.println(stateReward+" + ("+gamma+" * "+transVal+")");
 			 uVal = stateReward + (gamma * transVal);
 			 
 			 if(uVal > maxVal){
